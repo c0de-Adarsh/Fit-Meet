@@ -1,0 +1,62 @@
+# Node.js
+node_modules/
+npm-debug.log
+yarn-debug.log
+yarn-error.log
+.pnpm-debug.log
+
+# dotenv environment variables file
+.env
+
+# Logs
+logs/
+*.log
+*.log.*
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# VSCode files
+.vscode/
+
+# IDE files
+.idea/
+
+# Coverage directory used by testing tools
+coverage/
+
+# Build directories
+dist/
+build/
+
+# Temporary directories
+temp/
+tmp/
+
+# Test directories (if any)
+tests/tmp/
+
+# Build output directories (for example, Babel, Webpack)
+.eslintcache
+.cache/
+
+# IDE specific config files (e.g., JetBrains)
+*.iml
+.idea/
+
+# Dependency directories (e.g., for frameworks, libraries, etc.)
+bower_components/
+
+# Storybook build output
+storybook-static/
+
+# Optional npm cache directory
+.npm/
+
+# Tye/Visual Studio config files
+.vs/
+
+# Miscellaneous
+*.swp
+*~
