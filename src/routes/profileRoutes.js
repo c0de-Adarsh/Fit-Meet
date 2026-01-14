@@ -3,7 +3,10 @@ const router = express.Router();
 const profileController = require('../controllers/profileController');
 const authMiddleware = require('../middlewares/authMiddleware');
 
+// Get detailed user profile by ID
+router.get('/user/:userId', authMiddleware, profileController.getUserProfile);
 
+// Get profile stats
 router.get('/stats', authMiddleware, profileController.getProfileStats);
 
 

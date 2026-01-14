@@ -1,5 +1,62 @@
 const User = require('../models/User');
 
+// Get detailed user profile by ID
+exports.getUserProfile = async (req, res) => {
+  try {
+    const { userId } = req.params;
+    
+    const user = await User.findById(userId).select('-__v -phoneNumber -countryCode -termsAccepted -termsAcceptedAt -idDocument -gymMembershipDocument -currentStep -isActive -isBlocked -createdAt -updatedAt');
+
+    if (!user) {
+      return res.status(404).json({ 
+        success: false, 
+        message: 'User not found' 
+      });
+    }
+
+    // Format the response with all profile details
+    const profileData = {
+      id: user._id,
+      name: user.firstName || user.name,
+      firstName: user.firstName,
+      age: user.age,
+      birthday: user.birthday,
+      gender: user.gender,
+      interestedIn: user.interestedIn,
+      lookingFor: user.lookingFor,
+      ageRange: user.ageRange,
+      bio: user.bio,
+      interests: user.interests || [],
+      photos: user.photos || [], // Return full photos array
+      gymName: user.gymName,
+      gymLocation: user.gymLocation,
+      isPhoneVerified: user.isPhoneVerified,
+      profileCompleted: user.profileCompleted,
+      isOnline: user.isOnline,
+      lastSeen: user.lastSeen,
+      // Computed fields for backward compatibility
+      verified: user.isPhoneVerified && user.idDocument && user.gymMembershipDocument,
+      image: user.photos && user.photos.length > 0 ? user.photos[0].url : null,
+      activities: user.interests || [],
+      distance: user.gymLocation ? `${Math.floor(Math.random() * 10) + 1} km away` : 'Distance not available',
+      gym: user.gymName || 'Gym not specified'
+    };
+
+    res.status(200).json({
+      success: true,
+      user: profileData,
+      message: 'User profile retrieved successfully'
+    });
+  } catch (error) {
+    console.error('Get user profile error:', error);
+    res.status(500).json({ 
+      success: false, 
+      message: 'Failed to get user profile', 
+      error: error.message 
+    });
+  }
+};
+
 
 exports.getProfileStats = async (req, res) => {
   try {
