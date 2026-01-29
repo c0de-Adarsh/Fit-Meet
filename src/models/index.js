@@ -2,7 +2,7 @@ const User = require('./User');
 const Conversation = require('./Conversation');
 const Message = require('./Message');
 
-// Define associations
+
 User.hasMany(Conversation, { 
   foreignKey: 'user1Id', 
   as: 'conversationsAsUser1' 
