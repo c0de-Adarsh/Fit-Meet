@@ -1,43 +1,7 @@
 const Conversation = require('../models/Conversation');
 const Message = require('../models/Message');
 const User = require('../models/User');
-const multer = require('multer');
-const path = require('path');
-const fs = require('fs');
-
-const storage = multer.diskStorage({
-  destination: (req, file, cb) => {
-    const uploadPath = 'uploads/chat/';
-    if (!fs.existsSync(uploadPath)) {
-      fs.mkdirSync(uploadPath, { recursive: true });
-    }
-    cb(null, uploadPath);
-  },
-  filename: (req, file, cb) => {
-    const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
-    cb(null, file.fieldname + '-' + uniqueSuffix + path.extname(file.originalname));
-  }
-});
-
-const upload = multer({ 
-  storage: storage,
-  limits: {
-    fileSize: 50 * 1024 * 1024, // 50MB limit
-  },
-  fileFilter: (req, file, cb) => {
-    // Allow images, videos, audio, and documents
-    const allowedTypes = /jpeg|jpg|png|gif|mp4|mov|avi|mp3|wav|pdf|doc|docx|txt/;
-    const extname = allowedTypes.test(path.extname(file.originalname).toLowerCase());
-    const mimetype = allowedTypes.test(file.mimetype);
-    
-    if (mimetype && extname) {
-      return cb(null, true);
-    } else {
-      cb(new Error('Invalid file type'));
-    }
-  }
-});
-
+const upload = require('../middlewares/upload'); // Use Cloudinary upload middleware
 
 const getConversations = async (req, res) => {
   try {
@@ -287,7 +251,8 @@ const sendMediaMessage = async (req, res) => {
       p => p.toString() !== senderId.toString()
     );
 
-    const mediaUrl = `/uploads/chat/${req.file.filename}`;
+    // Cloudinary automatically provides the secure URL
+    const mediaUrl = req.file.path; // Cloudinary URL
     let content = '';
 
     // Set content based on file type
@@ -339,13 +304,14 @@ const sendMediaMessage = async (req, res) => {
     res.json({
       success: true,
       message: messageWithSender,
-      mediaUrl: `${req.protocol}://${req.get('host')}${mediaUrl}`
+      mediaUrl: mediaUrl // Direct Cloudinary URL
     });
   } catch (error) {
     console.error('Error sending media message:', error);
     res.status(500).json({
       success: false,
-      message: 'Failed to send media message'
+      message: 'Failed to send media message',
+      error: error.message
     });
   }
 };
@@ -431,7 +397,7 @@ module.exports = {
   getConversations,
   getMessages,
   sendMessage,
-  sendMediaMessage: [upload.single('file'), sendMediaMessage],
+  sendMediaMessage: [upload.single('file'), sendMediaMessage], // Use Cloudinary upload
   markAsRead,
   deleteMessage
 };

@@ -3,6 +3,7 @@ const express = require('express')
 const cors = require('cors')
 const helmet = require('helmet')
 const morgan = require('morgan')
+const path = require('path')
 const connectDB = require('@config/db')
 
 // Initialize Express app
@@ -30,18 +31,6 @@ app.use(morgan('dev'));
 
 app.use(express.json({ limit: '10mb' }))
 app.use(express.urlencoded({ extended: true, limit: '10mb' }))
-
-// Debug middleware to log request details
-app.use((req, res, next) => {
-  const contentType = req.get('Content-Type')
-  console.log('=== MIDDLEWARE DEBUG ===')
-  console.log('Content-Type:', contentType)
-  console.log('Method:', req.method)
-  console.log('URL:', req.url)
-  console.log('=== END MIDDLEWARE DEBUG ===')
-  next()
-})
-
 
 const routes = require('./routes')
 routes(app)
