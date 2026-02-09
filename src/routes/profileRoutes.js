@@ -9,6 +9,8 @@ router.get('/user/:userId', authMiddleware, profileController.getUserProfile);
 // Get profile stats
 router.get('/stats', authMiddleware, profileController.getProfileStats);
 
+// Update profile
+router.put('/update', authMiddleware, profileController.updateProfile);
 
 router.put('/completion', authMiddleware, profileController.updateProfileCompletion);
 

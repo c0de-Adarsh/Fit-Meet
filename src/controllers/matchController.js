@@ -1,5 +1,6 @@
 const User = require('../models/User');
 const Match = require('../models/Match');
+const { createNotification } = require('./notificationController');
 
 exports.getPotentialMatches = async (req, res) => {
   try {
@@ -157,12 +158,45 @@ exports.likeProfile = async (req, res) => {
       matchedAt: isMatch ? new Date() : null
     });
 
-    // Get user details for match response
+    // Get user details for notification and response
     const currentUser = await User.findById(currentUserId)
       .select('firstName age photos profileImage');
     
     const matchedUserDetails = await User.findById(likedUserId)
       .select('firstName age photos profileImage');
+
+    // Create notification for the liked user
+    try {
+      if (isMatch) {
+        // Create match notification for both users
+        await createNotification(
+          likedUserId,
+          currentUserId,
+          'match',
+          `You matched with ${currentUser.firstName}!`,
+          { matchId: mutualLike._id }
+        );
+        await createNotification(
+          currentUserId,
+          likedUserId,
+          'match',
+          `You matched with ${matchedUserDetails.firstName}!`,
+          { matchId: mutualLike._id }
+        );
+      } else {
+        // Create like notification only for the liked user
+        await createNotification(
+          likedUserId,
+          currentUserId,
+          'like',
+          `${currentUser.firstName} liked your profile!`,
+          {}
+        );
+      }
+    } catch (notifError) {
+      console.error('Error creating notification:', notifError);
+      // Don't fail the like/match if notification fails
+    }
 
     console.log('Sending response:', { isMatch, currentUser: currentUser?.firstName, matchedUser: matchedUserDetails?.firstName });
 

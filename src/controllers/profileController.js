@@ -198,3 +198,93 @@ exports.logout = async (req, res) => {
     });
   }
 };
+
+// Update user profile
+exports.updateProfile = async (req, res) => {
+  try {
+    const userId = req.userId;
+    const updates = req.body;
+
+    // Fields that can be updated
+    const allowedUpdates = [
+      'firstName',
+      'birthday',
+      'age',
+      'gender',
+      'interestedIn',
+      'lookingFor',
+      'ageRange',
+      'interests',
+      'bio',
+      'gymName',
+      'gymLocation'
+    ];
+
+    // Filter only allowed fields
+    const filteredUpdates = {};
+    Object.keys(updates).forEach(key => {
+      if (allowedUpdates.includes(key)) {
+        filteredUpdates[key] = updates[key];
+      }
+    });
+
+    // Update user
+    const user = await User.findByIdAndUpdate(
+      userId,
+      filteredUpdates,
+      { new: true, runValidators: true }
+    ).select('-__v -phoneNumber -countryCode -termsAccepted -termsAcceptedAt -idDocument -gymMembershipDocument');
+
+    if (!user) {
+      return res.status(404).json({
+        success: false,
+        message: 'User not found'
+      });
+    }
+
+    // Check profile completion
+    const isComplete = user.gymName && 
+                      user.firstName && 
+                      user.birthday && 
+                      user.gender && 
+                      user.interestedIn && 
+                      user.lookingFor && 
+                      user.ageRange && 
+                      user.interests && 
+                      user.interests.length > 0 && 
+                      user.bio && 
+                      user.photos && 
+                      user.photos.length > 0;
+
+    user.profileCompleted = isComplete;
+    await user.save();
+
+    res.status(200).json({
+      success: true,
+      message: 'Profile updated successfully',
+      user: {
+        id: user._id,
+        firstName: user.firstName,
+        age: user.age,
+        birthday: user.birthday,
+        gender: user.gender,
+        interestedIn: user.interestedIn,
+        lookingFor: user.lookingFor,
+        ageRange: user.ageRange,
+        interests: user.interests,
+        bio: user.bio,
+        gymName: user.gymName,
+        gymLocation: user.gymLocation,
+        photos: user.photos,
+        profileCompleted: user.profileCompleted
+      }
+    });
+  } catch (error) {
+    console.error('Update profile error:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Failed to update profile',
+      error: error.message
+    });
+  }
+};

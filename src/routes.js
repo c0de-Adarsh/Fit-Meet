@@ -4,6 +4,7 @@ const registrationRoutes = require('./routes/registrationRoutes');
 const matchRoutes = require('./routes/matchRoutes');
 const profileRoutes = require('./routes/profileRoutes');
 const chatRoutes = require('./routes/chatRoutes');
+const notificationRoutes = require('./routes/notificationRoutes');
 
 module.exports = (app) => {
 
@@ -23,4 +24,7 @@ module.exports = (app) => {
   
   
   app.use('/api/chat', chatRoutes);
+  
+  // Notification routes
+  app.use('/api/notifications', notificationRoutes);
 };
